@@ -1,4 +1,6 @@
 # sapporo_population
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/shimat/sapporo_population/main/main.py)
+
 Streamlit study: visualizing the population of each Sapporo area
 
 ## Reference Source
