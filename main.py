@@ -93,7 +93,7 @@ div.xx-small-font dt,dd,a {
 st.sidebar.markdown("""
 -----
 <p>GitHub</p>
-<p><a href="https://github.com/shimat/real_estate_price">https://github.com/shimat/https://github.com/shimat/sapporo_population</a></p>
+<p><a href="https://github.com/shimat/https://github.com/shimat/sapporo_population">https://github.com/shimat/https://github.com/shimat/sapporo_population</a></p>
 <p>出典</p>
 <div class="xx-small-font">
 <dl>
