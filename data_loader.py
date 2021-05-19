@@ -4,14 +4,14 @@ import pandas as pd
 import streamlit as st
 import requests
 import io
-from typing import Iterable
+from typing import Optional
 from converter import Converter
 
 
 class DataLoader:
     @staticmethod
     @st.cache
-    def load_coordinates_csv(file_name: str):
+    def load_coordinates_from_csv(file_name: str):
         csv = pd.read_csv(
             file_name,
             # encoding="SHIFT-JIS",
@@ -25,54 +25,13 @@ class DataLoader:
 
     @staticmethod
     @st.cache
-    def load_population_csv(file_name: str):
-        csv = pd.read_csv(
+    def load_population_from_csv(file_name: str):
+        df = pd.read_csv(
             file_name,
             header=1,)
-        csv['町条丁目_漢数字'] = csv['町条丁目'].apply(lambda x: Converter.replace_area_number_to_kansuji(x))
-        csv['区別'] = csv['区別'].apply(lambda x: x.replace('　', ''))
-        return csv
-
-    @staticmethod
-    @st.cache
-    def load_real_estate_csv(file_name: str):
-        csv = pd.read_csv(
-            file_name,
-            header=0,
-            usecols=['No',
-                     '種類',
-                     '都道府県名',
-                     '市区町村名',
-                     '地区名',
-                     '最寄駅：名称',
-                     # '最寄駅：距離（分）',
-                     '取引価格（総額）',
-                     # '間取り',
-                     '面積（㎡）',
-                     # '建築年',
-                     # '建物の構造',
-                     # '用途',
-                     # '都市計画',
-                     # '建ぺい率（％）',
-                     # '容積率（％）',
-                     '取引時点',
-                     # '改装'
-                     ])
-        # csv = csv[csv['市区町村名'].str.contains('札幌市')]
-        # csv = csv[csv['種類'] == '中古マンション等']
-        # csv['最寄駅：距離（分）'] = pd.to_numeric(csv["最寄駅：距離（分）"], errors='coerce')
-        csv['面積（㎡）'] = csv['面積（㎡）'].str.replace('㎡以上', '')
-        csv['面積（㎡）'] = pd.to_numeric(csv["面積（㎡）"], errors='coerce')
-        csv['取引時点'] = csv["取引時点"].str.rstrip("年第１２３４四半期").astype(np.int32)
-        #csv = csv.dropna(how='any')
-        return csv
-
-    @staticmethod
-    @st.cache(allow_output_mutation=True)
-    def load_geopandas(file_name: str):
-        gdf = gpd.read_file(file_name)
-        gdf.drop(columns=['KIGO_I', 'DUMMY1', 'KCODE1'], inplace=True)
-        return gdf
+        df['町条丁目_漢数字'] = df['町条丁目'].apply(lambda x: Converter.replace_area_number_to_kansuji(x))
+        df['区別'] = df['区別'].apply(lambda x: x.replace('　', ''))
+        return df
 
     @staticmethod
     @st.cache(allow_output_mutation=True)
@@ -89,3 +48,41 @@ class DataLoader:
         tables = [cls.load_geopandas_from_url(url) for url in url_list]
         result = pd.concat(tables)
         return result
+
+    @staticmethod
+    @st.cache
+    def load_population_by_age_from_url(url: str, limit: Optional[int] = None):
+        response = requests.get(url)
+        if limit:
+            url += f'&limit={limit}'
+        df = pd.json_normalize(response.json(), record_path=["result", "records"])
+        df.rename(columns=lambda s: s.replace(' ', '').replace('歳', ''), inplace=True)
+
+        column_names = ('年少人口', '0～4', '5～9', '10～14',
+                        '生産年齢人口', '15～19', '20～24', '25～29',
+                        '30～34', '35～39', '40～44', '45～49', '50～54', '55～59',
+                        '60～64', '老年人口', '65～69', '70～74', '75～79', '80～84',
+                        '85～89', '90～94', '95～99', '100以上')
+        for col in column_names:
+            df[col] = df[col].apply(lambda x: x.replace('-', '0'))
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        df['区分_漢数字'] = df['区分'].apply(lambda x: Converter.replace_area_number_to_kansuji(x))
+        return df
+
+    @staticmethod
+    @st.cache
+    def load_population_by_age_from_csv(file_name: str):
+        df = pd.read_csv(file_name)
+        df.rename(columns=lambda s: s.replace(' ', '').replace('歳', ''), inplace=True)
+
+        column_names = ('年少人口', '0～4', '5～9', '10～14',
+                        '生産年齢人口', '15～19', '20～24', '25～29',
+                        '30～34', '35～39', '40～44', '45～49', '50～54', '55～59',
+                        '60～64', '老年人口', '65～69', '70～74', '75～79', '80～84',
+                        '85～89', '90～94', '95～99', '100以上')
+        for col in column_names:
+            df[col] = df[col].apply(lambda x: x.replace('-', '0'))
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        df['区分_漢数字'] = df['区分'].apply(lambda x: Converter.replace_area_number_to_kansuji(x))
+        return df
