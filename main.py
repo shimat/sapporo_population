@@ -128,9 +128,12 @@ st.sidebar.markdown("""
 <p>出典</p>
 <div class="xx-small-font">
 <dl>
-<dt>人口データ</dt>
+<dt>人口データ(男女別)</dt>
 <dd>DATA-SMART CITY SAPPORO 町名・条丁目別世帯数及び男女別人口 令和3年（2021年）4月1日現在
 (<a href="https://ckan.pf-sapporo.jp/dataset/juuki_8/resource/17075eca-d5f3-4f2c-9fd7-89c155a63fa0">https://ckan.pf-sapporo.jp/dataset/juuki_8/resource/17075eca-d5f3-4f2c-9fd7-89c155a63fa0</a>)</dd>
+<dt>人口データ(年齢別)</dt>
+<dd>DATA-SMART CITY SAPPORO 町名、条丁目別年齢（5歳階級）別人口 令和２年（2020年）10月1日現在
+(<a href="https://ckan.pf-sapporo.jp/dataset/juuki_9/resource/51f660d2-1373-47ab-ad8b-834d75a4be2f">https://ckan.pf-sapporo.jp/dataset/juuki_9/resource/51f660d2-1373-47ab-ad8b-834d75a4be2f</a>)</dd>
 <dt>地区境界データ</dt>
 <dd>『国勢調査町丁・字等別境界データセット』（CODH作成） 「平成27年国勢調査町丁・字等別境界データ」（NICT加工）
 (<a href="https://geoshape.ex.nii.ac.jp/ka/">https://geoshape.ex.nii.ac.jp/ka/</a>)</dd>
