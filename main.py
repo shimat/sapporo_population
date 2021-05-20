@@ -26,27 +26,29 @@ summary_item = st.sidebar.selectbox('集計項目', ('総数', '男', '女', '�
 
 #df_coord = DataLoader.load_coordinates_csv(COORDINATES_CSV_FILE_NAME).copy()
 
-df_pop_age = DataLoader.load_population_by_age_from_csv(POPULATION_BY_AGE_CSV_FILE_NAME).copy()
-df_pop_age['年少人口率'] = df_pop_age['年少人口'] / df_pop_age['人口']
-df_pop_age['年少人口%'] = df_pop_age['年少人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
-df_pop_age['生産年齢人口率'] = df_pop_age['生産年齢人口'] / df_pop_age['人口']
-df_pop_age['生産年齢人口%'] = df_pop_age['生産年齢人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
-df_pop_age['老年人口率'] = df_pop_age['老年人口'] / df_pop_age['人口']
-df_pop_age['老年人口%'] = df_pop_age['老年人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
+if summary_item == '推定平均年齢':
+    df_pop_age = DataLoader.load_population_by_age_from_csv(POPULATION_BY_AGE_CSV_FILE_NAME).copy()
+    df_pop_age['年少人口率'] = df_pop_age['年少人口'] / df_pop_age['人口']
+    df_pop_age['年少人口%'] = df_pop_age['年少人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
+    df_pop_age['生産年齢人口率'] = df_pop_age['生産年齢人口'] / df_pop_age['人口']
+    df_pop_age['生産年齢人口%'] = df_pop_age['生産年齢人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
+    df_pop_age['老年人口率'] = df_pop_age['老年人口'] / df_pop_age['人口']
+    df_pop_age['老年人口%'] = df_pop_age['老年人口率'].apply(lambda x: "{:.2%}".format(x) if not np.isnan(x) else "")
 
-age_table = {'0～4': 2, '5～9': 7, '10～14': 12, '15～19': 17, '20～24': 22, '25～29': 27, '30～34': 32, '35～39': 37,
-             '40～44': 42, '45～49': 47, '50～54': 52, '55～59': 57, '60～64': 62, '65～69': 67, '70～74': 72,
-             '75～79': 77, '80～84': 82, '85～89': 87, '90～94': 92, '95～99': 97, '100以上': 102}
-df_pop_age['推定平均年齢'] = df_pop_age.apply(lambda row:
-                                        sum([row[k]*v for k, v in age_table.items()]) / row['人口'], axis=1)
-df_score_std = df_pop_age['推定平均年齢'].std(ddof=0)
-df_score_mean = df_pop_age['推定平均年齢'].mean()
-df_pop_age['推定平均年齢偏差値'] = df_pop_age['推定平均年齢'].map(lambda x: 50 if np.isnan(x) else round((x - df_score_mean) / df_score_std * 10 + 50))
-df_pop_age['推定平均年齢文字列'] = df_pop_age['推定平均年齢'].apply(lambda x: "{:.4g}".format(x) if not np.isnan(x) else "")
-dev_max = df_pop_age['推定平均年齢偏差値'].max()
-dev_min = df_pop_age['推定平均年齢偏差値'].min()
-#st.write(df_pop_age)
-#st.write(df_pop_age.dtypes)
+    age_table = {'0～4': 2.5, '5～9': 7.5, '10～14': 12.5, '15～19': 17.5, '20～24': 22.5, '25～29': 27.5, '30～34': 32.5,
+                 '35～39': 37.5, '40～44': 42.5, '45～49': 47.5, '50～54': 52.5, '55～59': 57.5, '60～64': 62.5,
+                 '65～69': 67.5, '70～74': 72.5, '75～79': 77.5, '80～84': 82.5, '85～89': 87.5, '90～94': 92.5,
+                 '95～99': 97.5, '100以上': 102.5}
+    df_pop_age['推定平均年齢'] = df_pop_age.apply(lambda row:
+                                            sum([row[k]*v for k, v in age_table.items()]) / row['人口'], axis=1)
+    df_score_std = df_pop_age['推定平均年齢'].std(ddof=0)
+    df_score_mean = df_pop_age['推定平均年齢'].mean()
+    df_pop_age['推定平均年齢偏差値'] = df_pop_age['推定平均年齢'].map(lambda x: 50 if np.isnan(x) else round((x - df_score_mean) / df_score_std * 10 + 50))
+    df_pop_age['推定平均年齢文字列'] = df_pop_age['推定平均年齢'].apply(lambda x: "{:.4g}".format(x) if not np.isnan(x) else "")
+    dev_max = df_pop_age['推定平均年齢偏差値'].max()
+    dev_min = df_pop_age['推定平均年齢偏差値'].min()
+    #st.write(df_pop_age)
+    #st.write(df_pop_age.dtypes)
 
 df_pop_sex = DataLoader.load_population_from_csv(POPULATION_CSV_FILE_NAME).copy()
 df_pop_sex = df_pop_sex.dropna(how='any')
@@ -64,7 +66,8 @@ gdf['S_NAME_漢数字'] = gdf['S_NAME'].apply(lambda x: Converter.replace_area_n
 # GEOJsonは「三条４丁目」
 # 人口CSVは「３条４丁目」
 gdf_merged = gdf.merge(df_pop_sex, left_on='S_NAME_漢数字', right_on='町条丁目_漢数字')
-gdf_merged = gdf_merged.merge(df_pop_age, left_on='S_NAME_漢数字', right_on='区分_漢数字')  #, how='outer')
+if summary_item == '推定平均年齢':
+    gdf_merged = gdf_merged.merge(df_pop_age, left_on='S_NAME_漢数字', right_on='区分_漢数字')  #, how='outer')
 
 if summary_item == '男女比':
     a = 0.30
@@ -97,6 +100,9 @@ geojson_layer = pydeck.Layer(
     get_color=[0, 255, 0],
     get_text='S_NAME',
 )
+tooltip_text = "{S_NAME}\n 総数: {総数} (男{男} / 女{女})\n女性比率: {女性比率文字列}\n世帯数: {世帯数}"
+if summary_item == '推定平均年齢':
+    tooltip_text += "\n推定平均年齢: {推定平均年齢文字列} (偏差値: {推定平均年齢偏差値})"
 st.pydeck_chart(pydeck.Deck(
     map_style='mapbox://styles/mapbox/streets-v11',
     initial_view_state=pydeck.ViewState(
@@ -108,11 +114,12 @@ st.pydeck_chart(pydeck.Deck(
     layers=[
         geojson_layer
     ],
-    tooltip={"text": "{S_NAME}\n 総数: {総数} (男{男} / 女{女})\n女性比率: {女性比率文字列}\n世帯数: {世帯数}\n推定平均年齢: {推定平均年齢文字列} (偏差値: {推定平均年齢偏差値})"}
+    tooltip={"text": tooltip_text}
 ))
 
 st.write('人口（男女別）', df_pop_sex[df_pop_sex['区別'] == ward])
-st.write('人口（年齢別）', df_pop_age[df_pop_sex['区別'] == ward])
+if summary_item == '推定平均年齢':
+    st.write('人口（年齢別）', df_pop_age[df_pop_age['区'] == ward])
 
 st.markdown("""
 <style>
